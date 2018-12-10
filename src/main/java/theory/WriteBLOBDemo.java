@@ -1,6 +1,7 @@
 package theory;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.*;
 
 public class WriteBLOBDemo {
@@ -19,7 +20,7 @@ public class WriteBLOBDemo {
     static final String USER = "root";
     static final String PASSWORD = "root";
 
-    public static void main(String[] args) {
+    public static void main(String[] args)   {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 
@@ -45,6 +46,28 @@ public class WriteBLOBDemo {
             preparedStatement.executeUpdate();
         } catch (Exception e) {
             System.out.println(e.getMessage());
+        }finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

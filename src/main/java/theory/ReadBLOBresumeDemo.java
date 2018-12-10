@@ -1,8 +1,6 @@
 package theory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.sql.*;
 
 public class ReadBLOBresumeDemo {
@@ -11,8 +9,8 @@ public class ReadBLOBresumeDemo {
      * @param args
      */
 
-    static final String JDBC_DRIVER =
-            "com.mysql.cj.jdbc.Driver";
+//    static final String JDBC_DRIVER =
+//            "com.mysql.cj.jdbc.Driver";
 
     static final String DATABASE_URL =
             "jdbc:mysql://localhost:3306/proselyte_tutorial";
@@ -21,23 +19,36 @@ public class ReadBLOBresumeDemo {
     static final String PASSWORD = "root";
 
     public static void main(String[] args) {
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet resultSet = null;
-        FileOutputStream outputStream = null;
 
-        try {
-            Class.forName(JDBC_DRIVER);
+        InputStream inputStream = null;
 
-            connection =
-                    DriverManager.getConnection(DATABASE_URL, USER, PASSWORD);
-            statement = connection.createStatement();
+        String SQL = "SELECT resume FROM personalinfo WHERE id=1";
 
-            String SQL = "SELECT resume FROM personalinfo WHERE id=1";
+        File file = new File("src\\main\\resources\\readMyResume.pdf");
 
-            resultSet = statement.executeQuery(SQL);
+        try (Connection connection = DriverManager.getConnection(DATABASE_URL, USER, PASSWORD);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(SQL);
+             FileOutputStream outputStream = new FileOutputStream(file)){
 
-            File file = new File("");
+            if (resultSet.next()) {
+                inputStream =
+                        resultSet.getBinaryStream("resume");
+                byte[] buff = new byte[1024];
+                while (inputStream.read(buff) > 0) {
+                    outputStream.write(buff);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }
